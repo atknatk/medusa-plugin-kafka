@@ -1,6 +1,6 @@
 {
   "name": "medusa-plugin-kafka",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "description": "Medusa Kafka Plugin.",
   "author": "Atakan Atik",
   "license": "MIT",

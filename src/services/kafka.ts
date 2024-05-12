@@ -32,7 +32,7 @@ class KafkaService {
       clientId: 'medusa-kafka-client',
       brokers: options.brokers,
       enforceRequestTimeout: true,
-      logLevel: logLevel.DEBUG,
+      logLevel: options.logLevel ?  options.logLevel : logLevel.NOTHING,
       retry: {
         retries: 3
       }

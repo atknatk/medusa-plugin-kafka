@@ -5,7 +5,7 @@ import {
     ProductService, 
   } from "@medusajs/medusa";
 import KafkaService from "../services/kafka";
-import { transformProduct } from "../utils/transformer";
+import { transformProduct } from "./transformer";
 
 // Defines the event handler function for various product events.
 export const eventHandler = async (args: SubscriberArgs) => {

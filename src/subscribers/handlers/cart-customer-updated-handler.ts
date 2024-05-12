@@ -5,7 +5,7 @@
         type SubscriberConfig, 
         type SubscriberArgs,
     } from "@medusajs/medusa"
-    import { eventHandler } from "../event-handler"
+    import { eventHandler } from "../../utils/event-handler"
     
     export default async (args: SubscriberArgs) => eventHandler(args);
 
