@@ -51,7 +51,7 @@ class KafkaService {
       isActive = eventConfig;
     } else if (eventConfig?.transform) {
       isActive = true;
-      transform = eventConfig?.transform;
+      transform = eventConfig.transform;
       topicName = (eventConfig.ignorePrefix ? '' : (this.config_.topicPrefix ?? '')) + (eventConfig.topic ?? eventName)
     } else {
       topicName = (this.config_.topicPrefix ?? '') + eventName;
@@ -81,7 +81,7 @@ class KafkaService {
     await producer.send({
       topic: config.topicName,
       messages: [
-        { value: JSON.stringify(config.transform ? config.transform(message, container) : message) },
+        { value: JSON.stringify(config.transform ? (await config.transform(message, container)) : message) },
       ],
     });
     await producer.disconnect();
