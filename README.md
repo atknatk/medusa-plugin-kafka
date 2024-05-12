@@ -28,7 +28,7 @@ Add the following configuration to your `medusa-config.js` to integrate the Kafk
   resolve: "medusa-plugin-kafka",
   options: {
     brokers: ['127.0.0.1:9092'], // List of Kafka brokers
-    topicPrefix: 'wodoxo', // Prefix for Kafka topics
+    topicPrefix: 'prefix', // Prefix for Kafka topics
     subscribeAll: true, // Subscribe to all Medusa events
     events: {
       'product.created': {
@@ -41,7 +41,24 @@ Add the following configuration to your `medusa-config.js` to integrate the Kafk
       'product.updated': {
         ignorePrefix: true,
         topic: 'product-update',
-        transform: (document) => {
+        transform: async (document, container) => {
+          /** @type {import('@medusajs/medusa').ProductService} */
+          const productService = container.resolve('productService');
+          const productFromDb = await productService.retrieve(data.id, {
+            relations: [
+              "variants",
+              "variants.prices",
+              "variants.options",
+              "images",
+              "options",
+              "tags",
+              "type",
+              "collection",
+              "categories",
+              "categories.category_children",
+              "categories.parent_category"
+            ],
+          });
           const { id, name, description, handle, is_active, category_children, products, metadata } = document;
           const result = {
             id,
