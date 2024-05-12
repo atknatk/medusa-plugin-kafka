@@ -20,7 +20,7 @@ export const transformProduct = (product: any) => {
   }, {})
   initialObj[`${prefix}_options_value`] = []
 
-  const flattenedVariantFields = product.variants.reduce((obj, variant) => {
+  const flattenedVariantFields = product.variants?.reduce((obj, variant) => {
     variantKeys.forEach((k) => {
       if (k === "options" && variant[k]) {
         const values = variant[k].map((option) => option.value)

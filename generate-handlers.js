@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const kafkaEvents = require('./src/subscribers/events').default;
+const kafkaEvents = require('./src/utils/events').default;
 
 // Event listesi, burayı istediğiniz event'larla doldurun.
 
@@ -22,7 +22,7 @@ kafkaEvents.forEach(event => {
         type SubscriberConfig, 
         type SubscriberArgs,
     } from "@medusajs/medusa"
-    import { eventHandler } from "../event-handler"
+    import { eventHandler } from "../../utils/event-handler"
     
     export default async (args: SubscriberArgs) => eventHandler(args);
 
