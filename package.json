@@ -1,18 +1,21 @@
 {
   "name": "medusa-plugin-kafka",
-  "version": "0.0.4",
-  "description": "A starter for Medusa projects.",
+  "version": "1.0.0-beta.0",
+  "description": "Medusa Kafka Plugin.",
   "author": "Atakan Atik",
   "license": "MIT",
+"repository": {
+    "type": "git",
+    "url": "https://github.com/atknatk/medusa-plugin-kafka.git"
+  },
   "keywords": [
-    "sqlite",
-    "postgres",
     "typescript",
     "ecommerce",
     "headless",
     "medusa",
     "medusa-plugin",
-    "medusa-plugin-kafka"
+    "medusa-plugin-kafka",
+    "kafka"
   ],
   "files": [
     "dist"
