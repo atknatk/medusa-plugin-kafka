@@ -19,7 +19,7 @@ switch (process.env.NODE_ENV) {
 
 try {
   dotenv.config({ path: process.cwd() + "/" + ENV_FILE_NAME });
-} catch (e) {}
+} catch (e) { }
 
 // CORS when consuming Medusa from admin
 const ADMIN_CORS =
@@ -60,6 +60,44 @@ const plugins = [
       develop: {
         open: process.env.OPEN_BROWSER !== "false",
       },
+    },
+  },
+
+  {
+    resolve: "medusa-plugin-kafka",
+    /** @type {import('medusa-plugin-kafka').PluginOptions} */
+    options: {
+      brokers: ['31.220.77.86:9092'],
+      topicPrefix: 'wodoxo',
+      subscribeAll: true,
+      events: {
+        'product.created': {
+          ignorePrefix: true,
+          topic: 'product-update',
+          transform: (document) => {
+            return document;
+          }
+        },
+        'product.updated': {
+          ignorePrefix: true,
+          topic: 'product-update',
+          transform: (document) => {
+            const { id, name, description, handle, is_active, category_children, products, metadata } = document;
+            const result = {
+              id,
+              name,
+              description,
+              handle,
+              is_active,
+              category_children,
+              products,
+              metadata
+            };
+            return result;
+          }
+        }
+        // .... other events
+      }
     },
   },
 ];

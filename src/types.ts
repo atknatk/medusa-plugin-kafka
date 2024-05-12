@@ -1,4 +1,4 @@
-import { ProductCategoryService, ProductService } from "@medusajs/medusa";
+import { MedusaContainer, ProductCategoryService, ProductService } from "@medusajs/medusa";
 
 export type EventKeys = keyof typeof ProductService.Events & keyof typeof ProductCategoryService.Events;
 
@@ -6,13 +6,13 @@ export const kafkaErrorCodes = {
   TOPIC_NOT_FOUND: "topic_not_found",
 }
 
-export interface KafkaPluginOptions {
+export interface PluginOptions {
   brokers: string[],
   
   /**
    * Kafka client configuration
    */
-  events: Config;
+  events?: Config;
 
   topicPrefix?: string;
 
@@ -28,5 +28,5 @@ type Config =  {
 export type KafkaEventConfig =  {
    ignorePrefix?: boolean;
    topic?: string; 
-   transform: (original) => any; 
+   transform: (original, container: MedusaContainer) => unknown; 
 }

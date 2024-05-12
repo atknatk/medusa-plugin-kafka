@@ -1,11 +1,11 @@
 import { MedusaContainer } from "@medusajs/modules-sdk"
 import { Logger } from "@medusajs/medusa"
 import KafkaService from "../services/kafka"
-import { KafkaPluginOptions } from "src/types"
+import { PluginOptions } from "../types"
 
 export default async (
   container: MedusaContainer,
-  options: KafkaPluginOptions
+  options: PluginOptions
 ) => {
   const logger: Logger = container.resolve("logger")
 

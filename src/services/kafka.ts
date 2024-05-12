@@ -1,115 +1,98 @@
-import { SearchTypes } from "@medusajs/types"
-import { SearchUtils } from "@medusajs/utils"
-import { Kafka } from "kafkajs"
-import { EventKeys, kafkaErrorCodes, KafkaPluginOptions } from "../types"
-import { transformProduct } from "./utils/transformer"
-import { Logger } from "@medusajs/medusa"
+// Importing necessary types and utilities from Medusa, KafkaJS, and local types.
+import { Logger, MedusaContainer } from "@medusajs/medusa";
+import { Kafka, logLevel } from "kafkajs";
+import { PluginOptions } from "../types";
 
-
+// Defines the KafkaService class for handling Kafka-related operations.
 class KafkaService {
+  // Variables for storing configuration, Kafka client, and logger.
+  protected config_: PluginOptions;
+  protected client_: Kafka;
+  protected logger_: Logger;
+
+  // Empty constructor as initialization is done through setSettings.
+  constructor() {}
+
+  // Sets the logger to be used by the KafkaService.
   setLogger(logger: Logger) {
     this.logger_ = logger;
   }
-  
 
-  protected config_: KafkaPluginOptions
-  protected client_: Kafka
-  protected logger_: Logger
+  // Configures the KafkaService with options provided.
+  setSettings(options: PluginOptions) {
+    this.config_ = options;
 
-  constructor() {
- 
-
-  }
-
-  setSettings(options: KafkaPluginOptions){
-
-    this.config_ = options
-
-    // if (process.env.NODE_ENV !== "development") {
-    //   if (!options.config?.apiKey) {
-    //     throw Error(
-    //       "Meilisearch API key is missing in plugin config. See https://docs.medusajs.com/add-plugins/meilisearch"
-    //     )
-    //   }
-    // }
-
-    // if (!(options.configs?.length > 0)) {
-    //   throw Error(
-    //     "Meilisearch configs is missing"
-    //   )
-    // }
-
-
+    // Check if the brokers list is provided.
     if (!(options.brokers?.length > 0)) {
-      throw Error(
-        "Meilisearch brokers is missing"
-      )
+      throw new Error("Kafka broker list is missing");
     }
 
+    // Creates a new Kafka client with specified options.
     this.client_ = new Kafka({
       clientId: 'medusa-kafka-client',
-      brokers : options.brokers
-    })
-
+      brokers: options.brokers,
+      enforceRequestTimeout: true,
+      logLevel: logLevel.DEBUG,
+      retry: {
+        retries: 3
+      }
+    });
   }
 
-  // getTransformedDocuments(type: string, documents: any[]) {
-  //   if (!documents?.length) {
-  //     return []
-  //   }
-
-  //   switch (type) {
-  //     case SearchTypes.indexTypes.PRODUCTS:
-  //       const productsTransformer =
-  //         this.config_.settings?.[SearchTypes.indexTypes.PRODUCTS]
-  //           ?.transformer ?? transformProduct
-
-  //       return documents.map(productsTransformer)
-  //     default:
-  //       return documents
-  //   }
-  // }
-
-
-  private getConfig(eventName: string) : {isActive : boolean , topicName : string, transform : (original)=> any}{
+  // Retrieves the configuration for a specific event.
+  private getConfig(eventName: string) : {isActive : boolean, topicName : string, transform : (original, container: MedusaContainer) => unknown} {
     let isActive : boolean = this.config_.subscribeAll ?? true;
     let topicName : string = (this.config_.topicPrefix ?? '') + eventName;
     let transform;
-    const eventConfig = this.config_.events[eventName];  
+
+    // Checks if there is a specific configuration for the event.
+    const eventConfig = this.config_.events ? this.config_.events[eventName] : undefined;
     if (typeof eventConfig == "boolean") {
-        isActive = eventConfig;
-    }else if (eventConfig?.transform){
+      isActive = eventConfig;
+    } else if (eventConfig?.transform) {
       isActive = true;
       transform = eventConfig?.transform;
       topicName = (eventConfig.ignorePrefix ? '' : (this.config_.topicPrefix ?? '')) + (eventConfig.topic ?? eventName)
-    }else{
-      topicName = (this.config_.topicPrefix ?? '') +  eventName;
+    } else {
+      topicName = (this.config_.topicPrefix ?? '') + eventName;
     }
-    return{
+
+    return {
       isActive,
       topicName,
       transform
-    }
+    };
   }
 
-
-  async sendMessage(eventName: string, message: unknown) {
+  // Sends a message to a Kafka topic based on the event configuration.
+  async sendMessage(eventName: string, message: unknown, container: MedusaContainer) {
     const config = this.getConfig(eventName);
-    if(!config.isActive){
-        return
+    if (!config.isActive) {
+      return;
     }
-     await this.client_.producer().send({
+    this.logger_.info(`Kafka -> eventName: ${eventName}, topicName: ${config.topicName}, message: ${JSON.stringify(message)}`);
+    
+    // Connects to Kafka and sends the message.
+    const producer = this.client_.producer({
+      allowAutoTopicCreation: true,
+      transactionTimeout: 10000,
+    });
+    await producer.connect();
+    await producer.send({
       topic: config.topicName,
       messages: [
-        { value: JSON.stringify(config.transform ? config.transform(message): message) },
+        { value: JSON.stringify(config.transform ? config.transform(message, container) : message) },
       ],
-    })
+    });
+    await producer.disconnect();
   }
 
+  // Placeholder for running any necessary startup logic for Kafka producer.
   async run () {
-    await this.client_.producer().connect()
+    // Placeholder for potential future use.
   }
 
 }
 
+// Exports the KafkaService for use elsewhere in the application.
 export default KafkaService

@@ -1,70 +1,81 @@
-<p align="center">
-  <a href="https://www.medusajs.com">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/59018053/229103275-b5e482bb-4601-46e6-8142-244f531cebdb.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
-    <img alt="Medusa logo" src="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
-    </picture>
-  </a>
-</p>
-<h1 align="center">
-  Medusa
-</h1>
 
-<h4 align="center">
-  <a href="https://docs.medusajs.com">Documentation</a> |
-  <a href="https://www.medusajs.com">Website</a>
-</h4>
+# medusa-plugin-kafka
 
-<p align="center">
-  Building blocks for digital commerce
-</p>
-<p align="center">
-  <a href="https://github.com/medusajs/medusa/blob/master/CONTRIBUTING.md">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome!" />
-  </a>
-    <a href="https://www.producthunt.com/posts/medusa"><img src="https://img.shields.io/badge/Product%20Hunt-%231%20Product%20of%20the%20Day-%23DA552E" alt="Product Hunt"></a>
-  <a href="https://discord.gg/xpCwq3Kfn8">
-    <img src="https://img.shields.io/badge/chat-on%20discord-7289DA.svg" alt="Discord Chat" />
-  </a>
-  <a href="https://twitter.com/intent/follow?screen_name=medusajs">
-    <img src="https://img.shields.io/twitter/follow/medusajs.svg?label=Follow%20@medusajs" alt="Follow @medusajs" />
-  </a>
-</p>
+**Warning:** This plugin is currently under development and may be unstable.
 
-## Compatibility
+`medusa-plugin-kafka` is a Kafka integration plugin for MedusaJS. This plugin connects to specified Kafka brokers and forwards events triggered in the MedusaJS application to configured Kafka topics, allowing real-time integration of your e-commerce platform with other systems.
 
-This starter is compatible with versions >= 1.8.0 of `@medusajs/medusa`. 
+## Features
 
-## Getting Started
+- **Customizable Topic Prefixes**: Define prefixes for topics to help categorize and route messages appropriately.
+- **Event Subscription**: Subscribe to specific or all Medusa events and configure individual processing rules for each.
+- **Data Transformation**: Transform event data before sending it to Kafka, ensuring that only relevant information is forwarded.
 
-Visit the [Quickstart Guide](https://docs.medusajs.com/create-medusa-app) to set up a server.
+## Installation
 
-Visit the [Docs](https://docs.medusajs.com/development/backend/prepare-environment) to learn more about our system requirements.
+To install the plugin, navigate to your MedusaJS project directory and run the following command:
 
-## What is Medusa
+```bash
+npm install medusa-plugin-kafka
+```
 
-Medusa is a set of commerce modules and tools that allow you to build rich, reliable, and performant commerce applications without reinventing core commerce logic. The modules can be customized and used to build advanced ecommerce stores, marketplaces, or any product that needs foundational commerce primitives. All modules are open-source and freely available on npm.
+## Configuration
 
-Learn more about [Medusa’s architecture](https://docs.medusajs.com/development/fundamentals/architecture-overview) and [commerce modules](https://docs.medusajs.com/modules/overview) in the Docs.
+Add the following configuration to your `medusa-config.js` to integrate the Kafka plugin with your Medusa store:
 
-## Roadmap, Upgrades & Plugins
+```javascript
+{
+  resolve: "medusa-plugin-kafka",
+  options: {
+    brokers: ['127.0.0.1:9092'], // List of Kafka brokers
+    topicPrefix: 'wodoxo', // Prefix for Kafka topics
+    subscribeAll: true, // Subscribe to all Medusa events
+    events: {
+      'product.created': {
+        ignorePrefix: true,
+        topic: 'product-update',
+        transform: (document) => {
+          return document;
+        }
+      },
+      'product.updated': {
+        ignorePrefix: true,
+        topic: 'product-update',
+        transform: (document) => {
+          const { id, name, description, handle, is_active, category_children, products, metadata } = document;
+          const result = {
+            id,
+            name,
+            description,
+            handle,
+            is_active,
+            category_children,
+            products,
+            metadata
+          };
+          return result;
+        }
+      }
+      // Add other events as needed
+    }
+  }
+}
+```
 
-You can view the planned, started and completed features in the [Roadmap discussion](https://github.com/medusajs/medusa/discussions/categories/roadmap).
+## Usage
 
-Follow the [Upgrade Guides](https://docs.medusajs.com/upgrade-guides/) to keep your Medusa project up-to-date.
+Once configured, the plugin will automatically start listening for the configured events and send the transformed data to the specified Kafka topics. Ensure that your Kafka instance is running and accessible from your Medusa server.
 
-Check out all [available Medusa plugins](https://medusajs.com/plugins/).
+## Development and Testing
 
-## Community & Contributions
+This plugin is currently in beta. Developers are encouraged to contribute to testing and enhancing its functionality. Please report any issues or contribute suggestions via GitHub issues.
 
-The community and core team are available in [GitHub Discussions](https://github.com/medusajs/medusa/discussions), where you can ask for support, discuss roadmap, and share ideas.
+## Contributing
 
-Join our [Discord server](https://discord.com/invite/medusajs) to meet other community members.
+Contributions are welcome! For major changes, please open an issue first to discuss what you would like to change. Ensure to update tests as appropriate.
 
-## Other channels
+## License
 
-- [GitHub Issues](https://github.com/medusajs/medusa/issues)
-- [Twitter](https://twitter.com/medusajs)
-- [LinkedIn](https://www.linkedin.com/company/medusajs)
-- [Medusa Blog](https://medusajs.com/blog/)
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
+
+For more details on event integration, visit the [Medusa Event Documentation](https://docs.medusajs.com/development/events/events-list).
