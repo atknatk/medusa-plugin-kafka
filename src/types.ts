@@ -1,5 +1,5 @@
 import { MedusaContainer, ProductCategoryService, ProductService } from "@medusajs/medusa";
-import { logLevel } from "kafkajs";
+import { Message, logLevel } from "kafkajs";
 
 export type EventKeys = keyof typeof ProductService.Events & keyof typeof ProductCategoryService.Events;
 
@@ -30,5 +30,5 @@ type Config =  {
 export type KafkaEventConfig =  {
    ignorePrefix?: boolean;
    topic?: string; 
-   transform: (original, container: MedusaContainer) => unknown; 
+   transform: (original, container: MedusaContainer) => Message;
 }

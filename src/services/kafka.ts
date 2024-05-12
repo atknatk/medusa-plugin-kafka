@@ -1,6 +1,6 @@
 // Importing necessary types and utilities from Medusa, KafkaJS, and local types.
 import { Logger, MedusaContainer } from "@medusajs/medusa";
-import { Kafka, logLevel } from "kafkajs";
+import { Kafka, Message, logLevel } from "kafkajs";
 import { PluginOptions } from "../types";
 
 // Defines the KafkaService class for handling Kafka-related operations.
@@ -40,7 +40,7 @@ class KafkaService {
   }
 
   // Retrieves the configuration for a specific event.
-  private getConfig(eventName: string) : {isActive : boolean, topicName : string, transform : (original, container: MedusaContainer) => unknown} {
+  private getConfig(eventName: string) : {isActive : boolean, topicName : string, transform : (original, container: MedusaContainer) => Message} {
     let isActive : boolean = this.config_.subscribeAll ?? true;
     let topicName : string = (this.config_.topicPrefix ?? '') + eventName;
     let transform;
@@ -77,12 +77,11 @@ class KafkaService {
       allowAutoTopicCreation: true,
       transactionTimeout: 10000,
     });
+    const transformedMessage = config.transform ? await config.transform(message, container) :   { value: JSON.stringify(message) } as Message;
     await producer.connect();
     await producer.send({
       topic: config.topicName,
-      messages: [
-        { value: JSON.stringify(config.transform ? (await config.transform(message, container)) : message) },
-      ],
+      messages: [transformedMessage],
     });
     await producer.disconnect();
   }
