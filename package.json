@@ -1,6 +1,6 @@
 {
 	"name": "medusa-plugin-kafka",
-	"version": "1.0.2-beta.3",
+	"version": "1.0.2",
 	"description": "Medusa Kafka Plugin.",
 	"author": "Atakan Atik",
 	"license": "MIT",
@@ -31,7 +31,7 @@
 		"start": "cross-env npm run build && medusa start",
 		"start:custom": "cross-env npm run build && node --preserve-symlinks --trace-warnings index.js",
 		"dev": "cross-env npm run build:server && medusa develop",
-		"prepare": "cross-env NODE_ENV=production npm run build",
+		"prepare": "cross-env npm run generate-handlers && cross-env NODE_ENV=production npm run build",
 		"generate-handlers": "ts-node -r ts-node/register generate-handlers.js"
 	},
 	"peerDependencies": {

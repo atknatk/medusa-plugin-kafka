@@ -70,6 +70,36 @@ const plugins = [
       brokers: ['31.220.77.86:9092'],
       topicPrefix: 'wodoxo',
       subscribeAll: true,
+      merge: [
+        {
+          ignorePrefix: true,
+          topic: 'product-update',
+          events : {
+            'variant.created': {
+              transform: (document) => {
+                return document;
+              }
+            },
+            'product.updated': {
+              transform: (document) => {
+                const { id, name, description, handle, is_active, category_children, products, metadata } = document;
+                const result = {
+                  id,
+                  name,
+                  description,
+                  handle,
+                  is_active,
+                  category_children,
+                  products,
+                  metadata
+                };
+                return result;
+              }
+            }
+            // .... other events
+          }
+        }
+      ],
       events: {
         'product.created': {
           ignorePrefix: true,
