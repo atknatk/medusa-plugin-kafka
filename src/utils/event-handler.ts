@@ -22,7 +22,8 @@ export const eventHandler = async (args: SubscriberArgs) => {
   // Logs the event and its data for debugging purposes.
   console.log(`Handling event: ${eventName} with data: ${JSON.stringify(message)}`);
   // Sends the transformed message to Kafka.
-  kafkaService.sendMessage(eventName, message, container);
+  kafkaService.sendMessageForEvents(eventName, message, container);
+  kafkaService.sendMessageForMerge(eventName, message, container);
 };
 
 // Factory function to create a configuration for subscribing to a specific event.
