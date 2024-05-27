@@ -33,7 +33,7 @@ Add the following configuration to your `medusa-config.js` to integrate the Kafk
   resolve: "medusa-plugin-kafka",
   /** @type {import('medusa-plugin-kafka').PluginOptions} */
   options: {
-    brokers: ['31.220.77.86:9092'], // List of Kafka brokers
+    brokers: ['127.0.0.1:9092'], // List of Kafka brokers
     topicPrefix: 'prefix.', // Prefix for Kafka topics
     logLevel: 4, // Logging level
     subscribeAll: false, // Subscribe to all Medusa events
